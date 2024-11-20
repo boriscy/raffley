@@ -8,7 +8,7 @@ defmodule RaffeleyWeb.EstimatorLive do
 
     socket = assign(socket, tickets: 0, price: 3)
     IO.inspect(self(), label: "MOUNT")
-    {:ok, socket}
+    {:ok, socket, title: "Estimator"}
   end
 
   def render(assigns) do

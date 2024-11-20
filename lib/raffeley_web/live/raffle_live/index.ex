@@ -4,7 +4,7 @@ defmodule RaffeleyWeb.RaffleLive.Index do
   alias Raffeley.Raffles
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, raffles: Raffles.list_raffles())
+    socket = assign(socket, raffles: Raffles.list_raffles(), page_title: "Raffles")
 
     {:ok, socket}
   end
@@ -12,20 +12,33 @@ defmodule RaffeleyWeb.RaffleLive.Index do
   def render(assigns) do
     ~H"""
     <div class="raffle-index">
-      <h1>Raffles</h1>
-
+      <.banner :let={vibe} :if={false}>
+        <.icon name="hero-sparkles-solid" /> Mistery Raffle comming soon! <%= vibe %>
+        <:details :let={vibe}>
+          Win amazing prizes and support your favorite creators <%= vibe %>
+        </:details>
+        <:details>
+          Any guesses?
+        </:details>
+      </.banner>
       <section>
         <div class="raffles">
-          <div :for={raffle <- @raffles} class="card">
-            <img src={raffle.image_path} alt="Image" />
-            <h2><%= raffle.prize %></h2>
-            <div class="details">
-              <div class="price">$<%= raffle.ticket_price %> / ticket</div>
-              <div class="badge"><%= raffle.status %></div>
-            </div>
-          </div>
+          <.raffle_card :for={raffle <- @raffles} raffle={raffle} />
         </div>
       </section>
+    </div>
+    """
+  end
+
+  def raffle_card(assigns) do
+    ~H"""
+    <div class="card">
+      <img src={@raffle.image_path} alt="Image" />
+      <h2><%= @raffle.prize %></h2>
+      <div class="details">
+        <div class="price">$<%= @raffle.ticket_price %> / ticket</div>
+        <.badge status={@raffle.status} class="font-bold" id={"status-#{@raffle.id}"} />
+      </div>
     </div>
     """
   end

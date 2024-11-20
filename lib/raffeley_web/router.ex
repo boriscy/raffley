@@ -1,4 +1,5 @@
 defmodule RaffeleyWeb.Router do
+  alias Raffeley.Raffle
   use RaffeleyWeb, :router
 
   pipeline :browser do
@@ -27,10 +28,11 @@ defmodule RaffeleyWeb.Router do
   scope "/", RaffeleyWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    # get "/", PageController, :home
     get "/rules", RuleController, :index
     get "/rules/:id", RuleController, :show
 
+    live "/", RaffleLive.Index
     live "/estimator", EstimatorLive
     live "/raffles", RaffleLive.Index
   end

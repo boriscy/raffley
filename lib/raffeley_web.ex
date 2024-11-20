@@ -86,6 +86,7 @@ defmodule RaffeleyWeb do
       # Core UI components and translation
       import RaffeleyWeb.CoreComponents
       import RaffeleyWeb.Gettext
+      import RaffeleyWeb.CustomComponents
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

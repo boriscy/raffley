@@ -26,3 +26,6 @@ liveSocket.enableDebug() // Enable
 
 liveSocket.disableDebug() //Disable
 ```
+
+Really cool for testing
+{:mneme, ">= 0.0.0", only: :test}

@@ -326,7 +326,7 @@
   }
 
   .banner h1 {
-    @apply font-extrabold text-gray-50 text-xl flex items-center justify-center gap-2;
+    @apply font-extrabold text-gray-50 text-xl flex items-center justify-center gap-2 m-1;
   }
 
   .banner .details {
