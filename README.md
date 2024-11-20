@@ -1,4 +1,4 @@
-# Raffeley
+# Raffley
 
 To start your Phoenix server:
 

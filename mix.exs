@@ -1,9 +1,9 @@
-defmodule Raffeley.MixProject do
+defmodule Raffley.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :raffeley,
+      app: :raffley,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule Raffeley.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Raffeley.Application, []},
+      mod: {Raffley.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -75,10 +75,10 @@ defmodule Raffeley.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind raffeley", "esbuild raffeley"],
+      "assets.build": ["tailwind raffley", "esbuild raffley"],
       "assets.deploy": [
-        "tailwind raffeley --minify",
-        "esbuild raffeley --minify",
+        "tailwind raffley --minify",
+        "esbuild raffley --minify",
         "phx.digest"
       ]
     ]
