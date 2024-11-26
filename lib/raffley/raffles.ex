@@ -52,10 +52,10 @@ defmodule Raffley.Raffles do
     end
   end
 
-  def order(query, nil, _), do: query
+  defp order(query, nil, _), do: query
 
-  def order(query, field, :asc), do: query |> order_by(asc: ^field)
-  def order(query, field, :desc), do: query |> order_by(desc: ^field)
+  defp order(query, field, :asc), do: query |> order_by(asc: ^field)
+  defp order(query, field, :desc), do: query |> order_by(desc: ^field)
 
   @order_fields ["prize", "ticket_price"]
   def order(query, order_by) do
