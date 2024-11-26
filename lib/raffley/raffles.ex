@@ -35,7 +35,7 @@ defmodule Raffley.Raffles do
       "" ->
         query
 
-      q ->
+      _ ->
         query
         |> where([r], ilike(r.prize, ^"%#{prize}%"))
     end
@@ -46,32 +46,33 @@ defmodule Raffley.Raffles do
       "" ->
         query
 
-      st ->
+      _ ->
         query
-        |> where([r], r.status == ^st)
+        |> where([r], r.status == ^status)
     end
   end
 
+  def order(query, nil, _), do: query
+
+  def order(query, field, :asc), do: query |> order_by(asc: ^field)
+  def order(query, field, :desc), do: query |> order_by(desc: ^field)
+
+  @order_fields ["prize", "ticket_price"]
   def order(query, order_by) do
-    case order_by do
-      "" ->
-        query
+    [field, order] =
+      case order_by do
+        "asc_" <> field ->
+          [field, :asc]
 
-      "asc_prize" ->
-        query
-        |> order_by(asc: :prize)
+        "desc_" <> field ->
+          [field, :desc]
 
-      "desc_prize" ->
-        query
-        |> order_by(desc: :prize)
+        _ ->
+          [nil, nil]
+      end
 
-      "asc_ticket_price" ->
-        query
-        |> order_by(asc: :ticket_price)
+    field = Enum.find(@order_fields, &(&1 == field))
 
-      "desc_ticket_price" ->
-        query
-        |> order_by(desc: :ticket_price)
-    end
+    order(query, field, order)
   end
 end
