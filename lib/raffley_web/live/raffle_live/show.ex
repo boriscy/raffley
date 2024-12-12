@@ -17,7 +17,12 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
         raffle ->
           assign(socket, raffle: raffle, page_title: raffle.prize)
-          |> assign(featured_raffles: Raffles.featured(raffle))
+          |> assign_async(:featured_raffles, fn ->
+            # TODO: Remove when nessary, this is for testing purposes
+            Process.sleep(2000)
+            {:ok, %{featured_raffles: Raffles.featured(raffle)}}
+            # {:error, "Failed to load featured raffles"}
+          end)
       end
 
     {:noreply, socket}
@@ -46,32 +51,41 @@ defmodule RaffleyWeb.RaffleLive.Show do
         <div class="left"></div>
         <div class="right">
           <h4>Featured Raffles</h4>
-          <ul class="raffles">
-            <.featured_raffles raffles={@featured_raffles} />
-          </ul>
+
+          <.featured_raffles raffles={@featured_raffles} />
         </div>
       </div>
     </div>
     """
   end
 
+  attr :raffles, :map, required: true
+
   def featured_raffles(assigns) do
     ~H"""
-    <li :for={raffle <- @raffles}>
-      <.link navigate={~p"/raffles/#{raffle.id}"}>
-        <%!-- <Index.raffle_card raffle={raffle} /> --%>
-        <img src={raffle.image_path} alt="Image" />
-        <%= raffle.prize %>
-      </.link>
-    </li>
+    <.async_result :let={raffles} assign={@raffles}>
+      <:loading>
+        <div class="loading">
+          <div class="spinner"></div>
+        </div>
+      </:loading>
+
+      <:failed :let={{:error, reason}}>
+        <div class="failed">
+          Error: {reason}
+        </div>
+      </:failed>
+
+      <ul class="raffles">
+        <li :for={raffle <- raffles}>
+          <.link navigate={~p"/raffles/#{raffle.id}"}>
+            <%!-- <Index.raffle_card raffle={raffle} /> --%>
+            <img src={raffle.image_path} alt="Image" />
+            <%= raffle.prize %>
+          </.link>
+        </li>
+      </ul>
+    </.async_result>
     """
   end
-
-  # def render(assigns) do
-  #   ~H"""
-  #   <div class="raffle-show">
-  #     <Index.raffle_card raffle={@raffle} />
-  #   </div>
-  #   """
-  # end
 end

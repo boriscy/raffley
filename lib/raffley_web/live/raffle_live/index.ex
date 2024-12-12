@@ -11,10 +11,20 @@ defmodule RaffleyWeb.RaffleLive.Index do
   def handle_params(params, _url, socket) do
     socket =
       socket
-      |> stream(:raffles, Raffles.filter_raffles(params))
-      |> assign(form: to_form(%{}))
+      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+      |> assign(form: to_form(params))
       |> assign(page_title: "Raffles")
-      |> assign(params: params)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("filter", params, socket) do
+    params =
+      params
+      |> Map.take(~w(q status order_by))
+      |> Map.reject(fn {_, v} -> v == "" end)
+
+    socket = push_patch(socket, to: ~p"/raffles?#{params}")
 
     {:noreply, socket}
   end
@@ -35,7 +45,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
         </:details>
       </.banner>
 
-      <.filter_form form={@form} params={@params} />
+      <.filter_form form={@form} />
 
       <section>
         <div class="raffles" id="raffles" phx-update="stream">
@@ -44,22 +54,6 @@ defmodule RaffleyWeb.RaffleLive.Index do
       </section>
     </div>
     """
-  end
-
-  def handle_event("filter", params, socket) do
-    IO.puts("FILTER")
-
-    socket =
-      socket
-      |> assign(form: to_form(params))
-      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
-      |> assign(params: params)
-
-    params = params |> Map.take(~w(q status order_by)) |> Map.reject(fn {_, v} -> v == "" end)
-
-    socket = push_navigate(socket, to: ~p"/raffles?#{params}")
-
-    {:noreply, socket}
   end
 
   attr :raffle, Raffles.Raffle, required: true
@@ -81,7 +75,6 @@ defmodule RaffleyWeb.RaffleLive.Index do
   end
 
   attr :form, :map, required: true
-  attr :params, :map
 
   def filter_form(assigns) do
     ~H"""
@@ -90,14 +83,12 @@ defmodule RaffleyWeb.RaffleLive.Index do
       <.input
         type="select"
         field={@form[:status]}
-        value={@params["status"]}
         prompt="Status"
         options={Raffles.Raffle.statuses()}
       />
       <.input
         type="select"
         field={@form[:order_by]}
-        value={@params["order_by"]}
         prompt="Order by"
         options={[
           "Name asc": :asc_prize,
@@ -106,6 +97,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
           "Ticket price desc": :desc_ticket_price
         ]}
       />
+      <.link patch={~p"/raffles"}>Reset</.link>
     </.form>
     """
   end
