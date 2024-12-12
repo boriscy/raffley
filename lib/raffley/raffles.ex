@@ -24,40 +24,31 @@ defmodule Raffley.Raffles do
 
   def filter_raffles(params \\ %{}) do
     Raffle
-    |> filter_prize(Map.get(params, "q"))
+    |> filter_prize(Map.get(params, "q") |> String.trim())
     |> filter_status(Map.get(params, "status"))
     |> order(Map.get(params, "order_by"))
     |> Repo.all()
   end
 
-  def filter_prize(query, prize) do
-    case prize do
-      "" ->
-        query
-
-      _ ->
-        query
-        |> where([r], ilike(r.prize, ^"%#{prize}%"))
-    end
+  def filter_prize(query, prize) when prize != "" do
+    query
+    |> where([r], ilike(r.prize, ^"%#{prize}%"))
   end
 
-  def filter_status(query, status) do
-    case status do
-      "" ->
-        query
+  def filter_prize(query, _), do: query
 
-      _ ->
-        query
-        |> where([r], r.status == ^status)
-    end
+  @statuses Enum.map(Raffle.statuses(), &Atom.to_string/1)
+  def filter_status(query, status) when status in @statuses do
+    query
+    |> where([r], r.status == ^status)
   end
 
-  defp order(query, nil, _), do: query
+  def filter_status(query, _), do: query
 
   defp order(query, field, :asc), do: query |> order_by(asc: ^field)
   defp order(query, field, :desc), do: query |> order_by(desc: ^field)
 
-  @order_fields ["prize", "ticket_price"]
+  @order_fields ["id", "prize", "ticket_price"]
   def order(query, order_by) do
     [field, order] =
       case order_by do
@@ -68,11 +59,12 @@ defmodule Raffley.Raffles do
           [field, :desc]
 
         _ ->
-          [nil, nil]
+          ["id", :asc]
       end
 
-    field = Enum.find(@order_fields, &(&1 == field))
-
-    order(query, field, order)
+    case Enum.find(@order_fields, &(&1 == field)) do
+      nil -> order(query, :id, order)
+      _ -> order(query, String.to_atom(field), order)
+    end
   end
 end
