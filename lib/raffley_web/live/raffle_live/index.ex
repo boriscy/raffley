@@ -5,21 +5,18 @@ defmodule RaffleyWeb.RaffleLive.Index do
   alias Raffley.Raffles
 
   def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  def handle_params(params, _url, socket) do
     socket =
       socket
-      |> stream(:raffles, Raffles.list_raffles())
+      |> stream(:raffles, Raffles.filter_raffles(params))
       |> assign(form: to_form(%{}))
       |> assign(page_title: "Raffles")
+      |> assign(params: params)
 
-    # IO.inspect(socket.assigns.streams.raffles, label: "MOUNT")
-
-    # socket =
-    #   attach_hook(socket, :log_stream, :after_render, fn socket ->
-    #     IO.inspect(socket.assigns.streams.raffles, label: "AFTER_RENDER")
-    #     socket
-    #   end)
-
-    {:ok, socket}
+    {:noreply, socket}
   end
 
   def render(assigns) do
@@ -38,7 +35,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
         </:details>
       </.banner>
 
-      <.filter_form form={@form} />
+      <.filter_form form={@form} params={@params} />
 
       <section>
         <div class="raffles" id="raffles" phx-update="stream">
@@ -50,10 +47,17 @@ defmodule RaffleyWeb.RaffleLive.Index do
   end
 
   def handle_event("filter", params, socket) do
+    IO.puts("FILTER")
+
     socket =
       socket
       |> assign(form: to_form(params))
       |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+      |> assign(params: params)
+
+    params = params |> Map.take(~w(q status order_by)) |> Map.reject(fn {_, v} -> v == "" end)
+
+    socket = push_navigate(socket, to: ~p"/raffles?#{params}")
 
     {:noreply, socket}
   end
@@ -77,20 +81,23 @@ defmodule RaffleyWeb.RaffleLive.Index do
   end
 
   attr :form, :map, required: true
+  attr :params, :map
 
   def filter_form(assigns) do
     ~H"""
     <.form for={@form} phx-change="filter" id="filter-form">
-      <.input field={@form[:q]} autocomplete="off" placeholder="Search..." />
+      <.input field={@form[:q]} autocomplete="off" placeholder="Search..." phx-debounce="500" />
       <.input
         type="select"
         field={@form[:status]}
+        value={@params["status"]}
         prompt="Status"
         options={Raffles.Raffle.statuses()}
       />
       <.input
         type="select"
         field={@form[:order_by]}
+        value={@params["order_by"]}
         prompt="Order by"
         options={[
           "Name asc": :asc_prize,

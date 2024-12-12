@@ -24,7 +24,7 @@ defmodule Raffley.Raffles do
 
   def filter_raffles(params \\ %{}) do
     Raffle
-    |> filter_prize(Map.get(params, "q") |> String.trim())
+    |> filter_prize(Map.get(params, "q"))
     |> filter_status(Map.get(params, "status"))
     |> order(Map.get(params, "order_by"))
     |> Repo.all()
