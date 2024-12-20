@@ -1,6 +1,6 @@
 defmodule RaffleyWeb.AdminRaffleLive.Index do
   use RaffleyWeb, :live_view
-  alias Raffley.{Admin, Raffles.Raffle}
+  alias Raffley.{Admin}
 
   def mount(_params, _session, socket) do
     socket = socket |> assign(page_title: "Listing Raffles")
@@ -9,10 +9,19 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
     {:ok, socket}
   end
 
-  def handle_event("delete", _params, socket) do
-    #IO.inspect(Repo.get(Raffle, id))
-    #{:ok, _} = Admin.delete_raffle(id)
-    {:noreply, socket}
+  def handle_event("delete", %{"id" => id}, socket) do
+    case Admin.delete_raffle(id) do
+      {:ok, _} ->
+        socket = socket
+        |> put_flash(:info, gettext("Raffle deleted successfully"))
+        |> push_navigate(to: "/admin/raffles")
+
+        {:noreply, socket}
+      {:error, _} ->
+        socket = socket
+          |> put_flash(:error, gettext("Error deleting raffle"))
+        {:noreply, socket}
+    end
   end
 
   def render(assigns) do
@@ -21,7 +30,7 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
       <.header>
         {@page_title}
         <:actions>
-          <.link navigate={~p"/admin/raffles/new"} class="button">New Raffle</.link>
+          <.link navigate={~p"/admin/raffles/new"} class="button">{gettext("New Raffle")}</.link>
         </:actions>
       </.header>
 
@@ -39,34 +48,14 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
         </:col>
 
         <:action :let={{_dom_id, raffle}}>
-          <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
-          <%!-- <.link id={"del-#{raffle.id}"} phx-click="delete" phx-value_id={raffle} data={[confirm: "Are you sure to delete the raffle"]} >Delete</.link> --%>
+          <div class="flex gap-4">
+            <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
+            <.link phx-click="delete" phx-value-id={raffle.id} data-confirm="Are you sure to delete the raffle">Delete</.link>
+          </div>
         </:action>
       </.table>
     </div>
     """
   end
 
-  # attr :raffle, Raffle, required: true
-  # def raffle(assigns) do
-  #   ~H"""
-  #   <tr>
-  #     <td>
-  #       <.link  navigate={~p"/admin/raffles/#{@raffle.id}"} class="font-semibold">
-  #         {@raffle.prize}
-  #       </.link>
-  #     </td>
-  #     <td>
-  #       <.badge status={@raffle.status} class="font-bold" id={"status-#{@raffle.id}"} />
-  #     </td>
-  #     <td>
-  #       {@raffle.ticket_price}
-  #     </td>
-  #     <td>
-  #       <.link navigate={~p"/admin/raffles/#{@raffle.id}/edit"}  >Edit</.link>
-  #       <.link phx-click="delete" phx-value_id={@raffle.id} data={[confirm: "Are you sure to delete the raffle"]} >Delete</.link>
-  #     </td>
-  #   </tr>
-  #   """
-  # end
 end

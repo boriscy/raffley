@@ -18,6 +18,11 @@ defmodule Raffley.Admin do
     |> Repo.update()
   end
 
+  def delete_raffle(id) do
+    raffle = get_raffle!(id)
+    Repo.delete(raffle)
+  end
+
   def get_raffle!(id) do
     Repo.get!(Raffle, id)
   end
