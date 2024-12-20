@@ -48,10 +48,10 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
         </:col>
 
         <:action :let={{_dom_id, raffle}}>
-          <div class="flex gap-4">
             <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
-            <.link phx-click="delete" phx-value-id={raffle.id} data-confirm="Are you sure to delete the raffle">Delete</.link>
-          </div>
+        </:action>
+        <:action :let={{_dom_id, raffle}}>
+          <.link phx-click="delete" phx-value-id={raffle.id} data-confirm="Are you sure to delete the raffle?">Delete</.link>
         </:action>
       </.table>
     </div>
