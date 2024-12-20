@@ -35,6 +35,10 @@ defmodule RaffleyWeb.Router do
     live "/estimator", EstimatorLive
     live "/raffles", RaffleLive.Index
     live "/raffles/:id", RaffleLive.Show
+
+    live "/admin/raffles", AdminRaffleLive.Index
+    live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
+    live "/admin/raffles/new", AdminRaffleLive.Form, :new
   end
 
   # Other scopes may use custom stacks.

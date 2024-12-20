@@ -453,3 +453,10 @@
     transform: translateX(0);
   }
 }
+
+table.table-auto th {
+  @apply text-left font-medium text-gray-600 px-4 py-1;
+}
+table.table-auto td {
+  @apply px-4 py-2;
+}
