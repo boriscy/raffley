@@ -57,7 +57,8 @@ defmodule Raffley.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:live_svelte, "~> 0.15.0-rc.6"}
     ]
   end
 
@@ -69,7 +70,7 @@ defmodule Raffley.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ecto.setup", "assets.setup", "cmd --cd assets npm install"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
@@ -77,7 +78,7 @@ defmodule Raffley.MixProject do
       "assets.build": ["tailwind raffley", "esbuild raffley"],
       "assets.deploy": [
         "tailwind raffley --minify",
-        "esbuild raffley --minify",
+        "cmd --cd assets node build.js --deploy",
         "phx.digest"
       ]
     ]

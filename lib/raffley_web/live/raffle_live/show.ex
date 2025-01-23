@@ -37,13 +37,13 @@ defmodule RaffleyWeb.RaffleLive.Show do
         <section>
           <.badge status={@raffle.status} />
           <header>
-            <h2><%= @raffle.prize %></h2>
+            <h2>{@raffle.prize}</h2>
             <div class="price">
-              <%= @raffle.ticket_price %> / ticket
+              {@raffle.ticket_price} / ticket
             </div>
           </header>
           <div class="description">
-            <%= @raffle.description %>
+            {@raffle.description}
           </div>
         </section>
       </div>
@@ -81,7 +81,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
           <.link navigate={~p"/raffles/#{raffle.id}"}>
             <%!-- <Index.raffle_card raffle={raffle} /> --%>
             <img src={raffle.image_path} alt="Image" />
-            <%= raffle.prize %>
+            {raffle.prize}
           </.link>
         </li>
       </ul>

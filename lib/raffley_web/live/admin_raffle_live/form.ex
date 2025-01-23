@@ -12,18 +12,18 @@ defmodule RaffleyWeb.AdminRaffleLive.Form do
     raffle = %Raffle{}
 
     socket
-      |> assign(page_title: "New Raffle")
-      |> assign(form: to_form(Admin.change_raffle(raffle)))
-      |> assign(raffle: raffle)
+    |> assign(page_title: "New Raffle")
+    |> assign(form: to_form(Admin.change_raffle(raffle)))
+    |> assign(raffle: raffle)
   end
 
   defp apply_action(socket, :edit, params) do
     raffle = Admin.get_raffle!(params["id"])
 
     socket
-      |> assign(page_title: "Edit Raffle")
-      |> assign(form: to_form(Admin.change_raffle(raffle)))
-      |> assign(raffle: raffle)
+    |> assign(page_title: "Edit Raffle")
+    |> assign(form: to_form(Admin.change_raffle(raffle)))
+    |> assign(raffle: raffle)
   end
 
   def handle_event("save", %{"raffle" => params}, socket) do
@@ -40,13 +40,16 @@ defmodule RaffleyWeb.AdminRaffleLive.Form do
   defp save_raffle(socket, :new, params) do
     case Admin.create_raffle(params) do
       {:ok, _raffle} ->
-        socket = socket
+        socket =
+          socket
           |> put_flash(:info, "Raffle created successfully")
           |> push_navigate(to: "/admin/raffles")
 
         {:noreply, socket}
+
       {:error, %Ecto.Changeset{} = changeset} ->
-        socket = socket
+        socket =
+          socket
           |> put_flash(:error, "Error creating raffle")
           |> assign(form: to_form(changeset, as: "raffle"))
 
@@ -57,13 +60,16 @@ defmodule RaffleyWeb.AdminRaffleLive.Form do
   defp save_raffle(socket, :edit, params) do
     case Admin.update_raffle(socket.assigns.raffle, params) do
       {:ok, _raffle} ->
-        socket = socket
+        socket =
+          socket
           |> put_flash(:info, gettext("Raffle updated successfully"))
           |> push_navigate(to: "/admin/raffles")
 
         {:noreply, socket}
+
       {:error, %Ecto.Changeset{} = changeset} ->
-        socket = socket
+        socket =
+          socket
           |> put_flash(:error, "Error updating raffle")
           |> assign(form: to_form(changeset, as: "raffle"))
 
@@ -78,7 +84,12 @@ defmodule RaffleyWeb.AdminRaffleLive.Form do
     </.header>
     <.simple_form for={@form} id="raffle-form" phx-submit="save" phx-change="validate">
       <.input field={@form[:prize]} label="Prize" phx-debounce="blur" />
-      <.input field={@form[:description]} type="textarea" label={gettext("Description")} phx-debounce="blur" />
+      <.input
+        field={@form[:description]}
+        type="textarea"
+        label={gettext("Description")}
+        phx-debounce="blur"
+      />
       <.input field={@form[:ticket_price]} type="number" label={gettext("Ticket Price")} />
       <.input
         type="select"

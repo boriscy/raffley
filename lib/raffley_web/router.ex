@@ -35,6 +35,7 @@ defmodule RaffleyWeb.Router do
     live "/estimator", EstimatorLive
     live "/raffles", RaffleLive.Index
     live "/raffles/:id", RaffleLive.Show
+    live "/svelte", SvelteLive.Index
 
     live "/admin/raffles", AdminRaffleLive.Index
     live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit

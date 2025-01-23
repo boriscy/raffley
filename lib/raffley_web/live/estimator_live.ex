@@ -19,16 +19,16 @@ defmodule RaffleyWeb.EstimatorLive do
         <button phx-click="update-ticket" phx-value-ticket="+">+</button>
         <button phx-click="update-ticket" phx-value-ticket="-">-</button>
         <div>
-          <%= @tickets %>
+          {@tickets}
           <%!-- <.input type="number" min="0" max="100" value={"#{@tickets}"} name="tickets" /> --%>
         </div>
         @
         <div>
-          $<%= @price %>
+          ${@price}
           <%!-- <.input type="number" min="0" max="1000" value={"#{@price}"} name="price" /> --%>
         </div>
         <div>
-          Total: $<%= @tickets * @price %>
+          Total: ${@tickets * @price}
         </div>
       </section>
 

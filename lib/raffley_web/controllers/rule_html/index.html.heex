@@ -2,14 +2,14 @@
   <h1>The Rules</h1>
 
   <p>
-    <%= @emojis %>
+    {@emojis}
   </p>
 
   <ol>
     <%= for rule <- @rules do %>
       <li>
         <a href={~p"/rules/#{rule.id}"}>
-          <%= rule.text %>
+          {rule.text}
         </a>
       </li>
     <% end %>
