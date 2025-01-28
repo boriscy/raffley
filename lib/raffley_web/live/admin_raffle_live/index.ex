@@ -3,7 +3,9 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
   alias Raffley.{Admin}
 
   def mount(_params, _session, socket) do
-    socket = socket |> assign(page_title: "Listing Raffles")
+    socket =
+      socket
+      |> assign(page_title: "Listing Raffles")
       |> stream(:raffles, Admin.list_raffles())
 
     {:ok, socket}
@@ -12,14 +14,18 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
   def handle_event("delete", %{"id" => id}, socket) do
     case Admin.delete_raffle(id) do
       {:ok, _} ->
-        socket = socket
-        |> put_flash(:info, gettext("Raffle deleted successfully"))
-        |> push_navigate(to: "/admin/raffles")
+        socket =
+          socket
+          |> put_flash(:info, gettext("Raffle deleted successfully"))
+          |> push_navigate(to: "/admin/raffles")
 
         {:noreply, socket}
+
       {:error, _} ->
-        socket = socket
+        socket =
+          socket
           |> put_flash(:error, gettext("Error deleting raffle"))
+
         {:noreply, socket}
     end
   end
@@ -48,14 +54,19 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
         </:col>
 
         <:action :let={{_dom_id, raffle}}>
-            <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
+          <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
         </:action>
         <:action :let={{_dom_id, raffle}}>
-          <.link phx-click="delete" phx-value-id={raffle.id} data-confirm="Are you sure to delete the raffle?">Delete</.link>
+          <.link
+            phx-click="delete"
+            phx-value-id={raffle.id}
+            data-confirm="Are you sure to delete the raffle?"
+          >
+            Delete
+          </.link>
         </:action>
       </.table>
     </div>
     """
   end
-
 end

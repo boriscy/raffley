@@ -25,7 +25,8 @@ config :raffley, RaffleyWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "R1bV49S8PINr0WEfdS82kV55CtnL3nj6oAW0bnj3wZI3TirFlqFHpYaZmtBFHGS7",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:raffley, ~w(--sourcemap=inline --watch)]},
+    node: ["build.js", "--watch", cd: Path.expand("../assets", __DIR__)],
+    # esbuild: {Esbuild, :install_and_run, [:raffley, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:raffley, ~w(--watch)]}
   ]
 

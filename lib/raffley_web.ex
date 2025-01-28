@@ -88,6 +88,7 @@ defmodule RaffleyWeb do
       import RaffleyWeb.Gettext
       import RaffleyWeb.CustomComponents
 
+      import LiveSvelte
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 
