@@ -1,11 +1,15 @@
 {
-    "compilerOptions": {
-        "verbatimModuleSyntax": true,
-        "types": ["node"],
-        "baseUrl": ".",
-        "paths": {
-            "$lib": ["svelte"],
-            "$lib/*": ["svelte/*"]
-        }
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "$lib": ["svelte"],
+      "$lib/*": ["svelte/*"]
     }
+  },
+  "typeRoots": ["./types.d.ts"],
+  "include": ["**/*.ts", "**/*.svelte"],
+  "exclude": ["node_modules"]
 }
