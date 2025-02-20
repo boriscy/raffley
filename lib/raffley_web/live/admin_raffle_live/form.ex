@@ -1,5 +1,6 @@
 defmodule RaffleyWeb.AdminRaffleLive.Form do
   use RaffleyWeb, :live_view
+  use Gettext, backend: RaffleyWeb.Gettext
   alias Raffley.{Admin, Raffles.Raffle}
 
   def mount(params, _session, socket) do

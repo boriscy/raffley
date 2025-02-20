@@ -1,5 +1,6 @@
 defmodule RaffleyWeb.CustomComponents do
   use Phoenix.Component
+  alias Phoenix.LiveView.JS
 
   attr(:status, :atom, required: true, values: [:open, :upcoming, :closed])
   attr(:class, :string, default: nil)
@@ -17,7 +18,7 @@ defmodule RaffleyWeb.CustomComponents do
       ]}
       {@rest}
     >
-      <%= @status %>
+      {@status}
     </div>
     """
   end
@@ -31,12 +32,17 @@ defmodule RaffleyWeb.CustomComponents do
     ~H"""
     <div class="banner">
       <h1>
-        <%= render_slot(@inner_block, @emoji) %>
+        {render_slot(@inner_block, @emoji)}
       </h1>
       <div :for={details <- @details} class="details">
-        <%= render_slot(details, @emoji) %>
+        {render_slot(details, @emoji)}
       </div>
     </div>
     """
+  end
+
+  def delete_and_hide(dom_id, raffle) do
+    JS.push("delete", value: %{id: raffle.id})
+    |> JS.hide(to: "##{dom_id}", transition: "fade-out")
   end
 end

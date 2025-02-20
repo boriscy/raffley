@@ -16,8 +16,8 @@ defmodule RaffleyWeb.CoreComponents do
   """
   use Phoenix.Component
 
+  use Gettext, backend: RaffleyWeb.Gettext
   alias Phoenix.LiveView.JS
-  import RaffleyWeb.Gettext
 
   @doc """
   Renders a modal.

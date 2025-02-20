@@ -43,7 +43,6 @@ defmodule RaffleyWeb do
         layouts: [html: RaffleyWeb.Layouts]
 
       import Plug.Conn
-      import RaffleyWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -85,7 +84,6 @@ defmodule RaffleyWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import RaffleyWeb.CoreComponents
-      import RaffleyWeb.Gettext
       import RaffleyWeb.CustomComponents
 
       # Shortcut for generating JS commands
