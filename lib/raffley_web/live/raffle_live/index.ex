@@ -1,9 +1,11 @@
 defmodule RaffleyWeb.RaffleLive.Index do
   use RaffleyWeb, :live_view
 
-  alias Raffley.Raffles
+  alias Raffley.{Raffles, Charities}
 
   def mount(_params, _session, socket) do
+    socket = assign(socket, charity_options: Charities.charity_with_slugs())
+
     {:ok, socket}
   end
 
@@ -20,7 +22,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
   def handle_event("filter", params, socket) do
     params =
       params
-      |> Map.take(~w(q status order_by))
+      |> Map.take(~w(q status charity order_by))
       |> Map.reject(fn {_, v} -> v == "" end)
 
     socket = push_patch(socket, to: ~p"/raffles?#{params}")
@@ -44,7 +46,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
         </:details>
       </.banner>
 
-      <.filter_form form={@form} />
+      <.filter_form form={@form} charity_options={@charity_options} />
 
       <section>
         <div class="raffles" id="raffles" phx-update="stream">
@@ -87,6 +89,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
         prompt="Status"
         options={Raffles.Raffle.statuses()}
       />
+      <.input type="select" prompt="Charity" options={@charity_options} field={@form[:charity]} />
       <.input
         type="select"
         field={@form[:order_by]}
@@ -95,7 +98,9 @@ defmodule RaffleyWeb.RaffleLive.Index do
           "Name asc": :asc_prize,
           "Name desc": :desc_prize,
           "Ticket price asc": :asc_ticket_price,
-          "Ticket price desc": :desc_ticket_price
+          "Ticket price desc": :desc_ticket_price,
+          "Charity asc": :asc_charity,
+          "Charity desc": :desc_charity
         ]}
       />
       <.link patch={~p"/raffles"}>Reset</.link>
