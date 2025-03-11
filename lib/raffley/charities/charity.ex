@@ -6,6 +6,8 @@ defmodule Raffley.Charities.Charity do
     field :name, :string
     field :slug, :string
 
+    has_many(:raffles, Raffley.Raffles.Raffle, on_delete: :delete_all)
+
     timestamps(type: :utc_datetime)
   end
 

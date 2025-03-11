@@ -10,7 +10,7 @@ defmodule RaffleyWeb.CharityLive.Index do
       Listing Charities
       <:actions>
         <.button phx-click={JS.dispatch("click", to: {:inner, "a"})}>
-          <.link navigate={~p"/charities/new"}>
+          <.link navigate={~p"/charities/new"} class="text-white hover:text-white/90">
             New Charity
           </.link>
         </.button>

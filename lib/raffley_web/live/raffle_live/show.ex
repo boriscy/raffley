@@ -3,6 +3,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   import RaffleyWeb.CustomComponents
   # alias RaffleyWeb.RaffleLive.Index
   alias Raffley.Raffles
+  alias Raffley.Repo
 
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -16,7 +17,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
           |> push_navigate(to: "/raffles")
 
         raffle ->
-          assign(socket, raffle: raffle, page_title: raffle.prize)
+          assign(socket, raffle: Repo.preload(raffle, :charity), page_title: raffle.prize)
           |> assign_async(:featured_raffles, fn ->
             # TODO: Remove when nessary, this is for testing purposes
             Process.sleep(2000)
@@ -37,13 +38,16 @@ defmodule RaffleyWeb.RaffleLive.Show do
         <section>
           <.badge status={@raffle.status} />
           <header>
-            <h2><%= @raffle.prize %></h2>
+            <div>
+              <h2>{@raffle.prize}</h2>
+              <h3>{@raffle.charity.name}</h3>
+            </div>
             <div class="price">
-              <%= @raffle.ticket_price %> / ticket
+              {@raffle.ticket_price} / ticket
             </div>
           </header>
           <div class="description">
-            <%= @raffle.description %>
+            {@raffle.description}
           </div>
         </section>
       </div>
@@ -81,7 +85,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
           <.link navigate={~p"/raffles/#{raffle.id}"}>
             <%!-- <Index.raffle_card raffle={raffle} /> --%>
             <img src={raffle.image_path} alt="Image" />
-            <%= raffle.prize %>
+            {raffle.prize}
           </.link>
         </li>
       </ul>

@@ -35,9 +35,9 @@ defmodule RaffleyWeb.RaffleLive.Index do
     </pre> --%>
     <div class="raffle-index">
       <.banner :let={vibe} :if={false}>
-        <.icon name="hero-sparkles-solid" /> Mistery Raffle comming soon! <%= vibe %>
+        <.icon name="hero-sparkles-solid" /> Mistery Raffle comming soon! {vibe}
         <:details :let={vibe}>
-          Win amazing prizes and support your favorite creators <%= vibe %>
+          Win amazing prizes and support your favorite creators {vibe}
         </:details>
         <:details>
           Any guesses?
@@ -62,10 +62,12 @@ defmodule RaffleyWeb.RaffleLive.Index do
     ~H"""
     <.link navigate={~p"/raffles/#{@raffle}"} id={@id}>
       <div class="card">
+        <div class="charity">{@raffle.charity.name}</div>
+
         <img src={@raffle.image_path} alt="Image" />
-        <h2><%= @raffle.prize %></h2>
+        <h2>{@raffle.prize}</h2>
         <div class="details">
-          <div class="price">$<%= @raffle.ticket_price %> / ticket</div>
+          <div class="price">${@raffle.ticket_price} / ticket</div>
           <.badge status={@raffle.status} class="font-bold" id={"status-#{@raffle.id}"} />
         </div>
       </div>

@@ -27,6 +27,7 @@ defmodule Raffley.Raffles do
     |> filter_prize(Map.get(params, "q"))
     |> filter_status(Map.get(params, "status"))
     |> order(Map.get(params, "order_by"))
+    |> preload(:charity)
     |> Repo.all()
   end
 
