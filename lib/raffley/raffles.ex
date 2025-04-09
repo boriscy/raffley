@@ -3,8 +3,6 @@ defmodule Raffley.Raffles do
   alias Raffley.Raffles.Raffle
   import Ecto.Query
 
-  # def get_raffle!(id) when is_binary(id), do: get_raffle!(String.to_integer(id))
-
   def get_raffle!(id) do
     Repo.get!(Raffle, id)
   end
