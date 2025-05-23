@@ -220,13 +220,17 @@ defmodule RaffleyWeb.CoreComponents do
       <.button>Send!</.button>
       <.button phx-click="go" class="ml-2">Send!</.button>
   """
-  attr :type, :string, default: nil
-  attr :class, :string, default: nil
   attr :rest, :global, include: ~w(disabled form name value)
+  attr :type, :string, default: nil
+  attr :variant, :string, values: ~w(primary secondary), default: "primary"
+  attr :class, :string, default: nil
 
   slot :inner_block, required: true
 
   def button(assigns) do
+    variants = %{"primary" => "btn-primary", "secondary" => "btn-secondary"}
+    assigns = assign(assigns, :class, Map.fetch!(variants, assigns[:variant]))
+
     ~H"""
     <button
       type={@type}

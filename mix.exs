@@ -9,7 +9,8 @@ defmodule Raffley.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -32,7 +33,8 @@ defmodule Raffley.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.7.14"},
+      {:bcrypt_elixir, "~> 3.0"},
+      {:phoenix, "~> 1.8.0-rc.3", override: true},
       # {:phoenix, github: "phoenixframework/phoenix", ref: "bd589f1", override: true},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},

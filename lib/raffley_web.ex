@@ -57,6 +57,15 @@ defmodule RaffleyWeb do
     end
   end
 
+  def live_view_chromeless do
+    quote do
+      use Phoenix.LiveView,
+        layout: {RaffleyWeb.Layouts, :chromeless}
+
+      unquote(html_helpers())
+    end
+  end
+
   def live_component do
     quote do
       use Phoenix.LiveComponent
