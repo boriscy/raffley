@@ -3,12 +3,18 @@ defmodule RaffleyWeb.RaffleLive.Show do
   import RaffleyWeb.CustomComponents
   alias Raffley.Raffles
   alias Raffley.Repo
+  alias Raffley.Tickets
+  alias Raffley.Tickets.Ticket
 
   # Can mount the user in any live_view
   # on_mount {RaffleyWeb.UserAuth, :mount_current_scope}
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, form: to_form(%{}))
+    socket =
+      assign(socket,
+        form: to_form(Tickets.change_ticket(%Ticket{}, %{}))
+      )
+
     {:ok, socket}
   end
 
@@ -20,7 +26,10 @@ defmodule RaffleyWeb.RaffleLive.Show do
           |> push_navigate(to: "/raffles")
 
         raffle ->
+          user = socket.assigns.current_scope.user
+
           assign(socket, raffle: Repo.preload(raffle, :charity), page_title: raffle.prize)
+          |> assign(:tickets, Tickets.list_tickets(user, raffle))
           |> assign_async(:featured_raffles, fn ->
             # TODO: Remove when nessary, this is for testing purposes
             Process.sleep(2000)
@@ -35,41 +44,59 @@ defmodule RaffleyWeb.RaffleLive.Show do
   #
   def render(assigns) do
     ~H"""
-    <div class="raffle-show">
-      <div class="raffle">
-        <img src={@raffle.image_path} alt="Image" />
-        <section>
-          <.badge status={@raffle.status} />
-          <header>
-            <div>
-              <h2>{@raffle.prize}</h2>
-              <h3>{@raffle.charity.name}</h3>
+    <Layouts.app flash={@flash}>
+      <div class="raffle-show">
+        <div class="raffle">
+          <img src={@raffle.image_path} alt="Image" />
+          <section>
+            <.badge status={@raffle.status} />
+            <header>
+              <div>
+                <h2>{@raffle.prize}</h2>
+                <h3>{@raffle.charity.name}</h3>
+              </div>
+              <div class="price">
+                {@raffle.ticket_price} / ticket
+              </div>
+            </header>
+            <div class="description">
+              {@raffle.description}
             </div>
-            <div class="price">
-              {@raffle.ticket_price} / ticket
-            </div>
-          </header>
-          <div class="description">
-            {@raffle.description}
-          </div>
-        </section>
-      </div>
-      <div class="activity">
-        <div class="left">
-          <%= if @current_scope do %>
-            <.form for={@form} id="ticket-form">
-              <.input field={@form[:comment]} placeholder="comment" autofocus />
-              <.button>Get A Ticket</.button>
-            </.form>
-          <% end %>
+          </section>
         </div>
-        <div class="right">
-          <h4>Featured Raffles</h4>
+        <div class="activity">
+          <div class="left">
+            <div :if={@raffle.status == :open}>
+              <%= if @current_scope do %>
+                <.form for={@form} id="ticket-form" phx-submit="save">
+                  <.input field={@form[:comment]} placeholder="comment" autofocus />
+                  <.button>Get A Ticket</.button>
+                </.form>
+              <% end %>
+            </div>
 
-          <.featured_raffles raffles={@featured_raffles} />
+            <div :if={@tickets} class="mt-4">
+              <h4 class="font-semibold text-lg mb-2">Your Tickets</h4>
+              <ul class="space-y-2">
+                <li :for={ticket <- @tickets} class="border-b grid grid-cols-2 items-center">
+                  <div>
+                    {ticket.comment}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    {Calendar.strftime(ticket.inserted_at, "%b %d %Y %H:%M:%S")}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="right">
+            <h4>Featured Raffles</h4>
+
+            <.featured_raffles raffles={@featured_raffles} />
+          </div>
         </div>
       </div>
-    </div>
+    </Layouts.app>
     """
   end
 
@@ -101,5 +128,33 @@ defmodule RaffleyWeb.RaffleLive.Show do
       </ul>
     </.async_result>
     """
+  end
+
+  def handle_event("validate", %{"ticket" => ticket_params}, socket) do
+    %{raffle: raffle, current_scope: scope} = socket.assigns
+    ticket = %Ticket{user_id: scope.user.id, raffle_id: raffle.id}
+
+    changeset = Tickets.change_ticket(ticket, ticket_params)
+
+    {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
+  end
+
+  def handle_event("save", %{"ticket" => ticket_params}, socket) do
+    %{raffle: raffle, current_scope: scope} = socket.assigns
+
+    case Tickets.create_ticket(scope.user, raffle, ticket_params) do
+      {:ok, ticket} ->
+        changeset = Tickets.change_ticket(%Ticket{})
+
+        socket =
+          assign(socket, form: to_form(changeset))
+          |> put_flash(:info, "Your ticket #{ticket.id} has been created")
+
+        {:noreply, socket}
+
+      {:error, changeset} ->
+        IO.inspect(changeset, label: "changeset error:")
+        {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
+    end
   end
 end

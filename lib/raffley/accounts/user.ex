@@ -10,6 +10,8 @@ defmodule Raffley.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    has_many :tickets, Raffley.Tickets.Ticket
+
     timestamps(type: :utc_datetime)
   end
 
