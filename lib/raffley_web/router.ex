@@ -39,19 +39,21 @@ defmodule RaffleyWeb.Router do
     get "/rules", RuleController, :index
     get "/rules/:id", RuleController, :show
 
-    live "/", RaffleLive.Index
-    live "/estimator", EstimatorLive
-    live "/raffles", RaffleLive.Index
-    live "/raffles/:id", RaffleLive.Show
+    live_session :current_user_public, on_mount: [{RaffleyWeb.UserAuth, :mount_current_scope}] do
+      live "/", RaffleLive.Index
+      live "/estimator", EstimatorLive
+      live "/raffles", RaffleLive.Index
+      live "/raffles/:id", RaffleLive.Show
 
-    live "/admin/raffles", AdminRaffleLive.Index
-    live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
-    live "/admin/raffles/new", AdminRaffleLive.Form, :new
+      live "/admin/raffles", AdminRaffleLive.Index
+      live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
+      live "/admin/raffles/new", AdminRaffleLive.Form, :new
 
-    live "/charities", CharityLive.Index, :index
-    live "/charities/new", CharityLive.Form, :new
-    live "/charities/:id", CharityLive.Show, :show
-    live "/charities/:id/edit", CharityLive.Form, :edit
+      live "/charities", CharityLive.Index, :index
+      live "/charities/new", CharityLive.Form, :new
+      live "/charities/:id", CharityLive.Show, :show
+      live "/charities/:id/edit", CharityLive.Form, :edit
+    end
   end
 
   # Other scopes may use custom stacks.

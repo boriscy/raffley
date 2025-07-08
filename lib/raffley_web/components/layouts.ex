@@ -31,10 +31,11 @@ defmodule RaffleyWeb.Layouts do
       <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
         <div class="flex items-center gap-4">
           <a href="/">
-            <img src={~p"/images/raffley-logo.svg"} width="120" />
+            <img src={~p"/images/raffley-logo.svg"} width="120" alt="Logo" />
           </a>
         </div>
-        <%!-- <.menu /> --%>
+
+        <.menu />
       </div>
     </header>
 

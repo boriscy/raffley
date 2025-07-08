@@ -212,6 +212,7 @@ defmodule RaffleyWeb.UserAuth do
       end
   """
   def on_mount(:mount_current_scope, _params, session, socket) do
+    IO.puts("mount_current_scope")
     {:cont, mount_current_scope(socket, session)}
   end
 

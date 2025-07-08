@@ -1,11 +1,14 @@
 defmodule RaffleyWeb.RaffleLive.Show do
   use RaffleyWeb, :live_view
   import RaffleyWeb.CustomComponents
-  # alias RaffleyWeb.RaffleLive.Index
   alias Raffley.Raffles
   alias Raffley.Repo
 
+  # Can mount the user in any live_view
+  # on_mount {RaffleyWeb.UserAuth, :mount_current_scope}
+
   def mount(_params, _session, socket) do
+    socket = assign(socket, form: to_form(%{}))
     {:ok, socket}
   end
 
@@ -52,7 +55,14 @@ defmodule RaffleyWeb.RaffleLive.Show do
         </section>
       </div>
       <div class="activity">
-        <div class="left"></div>
+        <div class="left">
+          <%= if @current_scope do %>
+            <.form for={@form} id="ticket-form">
+              <.input field={@form[:comment]} placeholder="comment" autofocus />
+              <.button>Get A Ticket</.button>
+            </.form>
+          <% end %>
+        </div>
         <div class="right">
           <h4>Featured Raffles</h4>
 

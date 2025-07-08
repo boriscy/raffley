@@ -35,6 +35,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
     <%!-- <pre>
       <%= inspect(@form, pretty: true) %>
     </pre> --%>
+    <Layouts.app flash={@flash}>
     <div class="raffle-index">
       <.banner :let={vibe} :if={false}>
         <.icon name="hero-sparkles-solid" /> Mistery Raffle comming soon! {vibe}
@@ -54,6 +55,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
         </div>
       </section>
     </div>
+    </Layouts.app>
     """
   end
 

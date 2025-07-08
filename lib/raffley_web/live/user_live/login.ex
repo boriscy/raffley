@@ -1,5 +1,5 @@
 defmodule RaffleyWeb.UserLive.Login do
-  use RaffleyWeb, :live_view_chromeless
+  use RaffleyWeb, :live_view
 
   alias Raffley.Accounts
   alias RaffleyWeb.Layouts
@@ -54,7 +54,7 @@ defmodule RaffleyWeb.UserLive.Login do
           </.button>
         </.form>
 
-        <div class="divider">or</div>
+        <%!-- <div class="divider">or</div>
 
         <.form
           :let={f}
@@ -87,7 +87,7 @@ defmodule RaffleyWeb.UserLive.Login do
           <.button class="w-full" variant="primary">
             Log in <span aria-hidden="true">→</span>
           </.button>
-        </.form>
+        </.form> --%>
       </div>
     </Layouts.app>
     """
