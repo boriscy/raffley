@@ -3,6 +3,14 @@ defmodule Raffley.Raffles do
   alias Raffley.Raffles.Raffle
   import Ecto.Query
 
+  def subscribe(raffle_id) do
+    Phoenix.PubSub.subscribe(Raffley.PubSub, "raffles:#{raffle_id}")
+  end
+
+  def broadcast(raffle_id, message) do
+    Phoenix.PubSub.broadcast(Raffley.PubSub, "raffles:#{raffle_id}", message)
+  end
+
   def get_raffle!(id) do
     Repo.get!(Raffle, id)
   end
@@ -78,4 +86,12 @@ defmodule Raffley.Raffles do
   end
 
   def order(query, _), do: query
+
+  def list_tickets(%Raffle{} = raffle) do
+    raffle
+    |> Ecto.assoc(:tickets)
+    |> order_by(desc: :inserted_at)
+    |> preload(:user)
+    |> Repo.all()
+  end
 end

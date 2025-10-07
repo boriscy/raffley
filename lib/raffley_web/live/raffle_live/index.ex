@@ -36,25 +36,25 @@ defmodule RaffleyWeb.RaffleLive.Index do
       <%= inspect(@form, pretty: true) %>
     </pre> --%>
     <Layouts.app flash={@flash}>
-    <div class="raffle-index">
-      <.banner :let={vibe} :if={false}>
-        <.icon name="hero-sparkles-solid" /> Mistery Raffle comming soon! {vibe}
-        <:details :let={vibe}>
-          Win amazing prizes and support your favorite creators {vibe}
-        </:details>
-        <:details>
-          Any guesses?
-        </:details>
-      </.banner>
+      <div class="raffle-index">
+        <.banner :let={vibe} :if={false}>
+          <.icon name="hero-sparkles-solid" /> Mistery Raffle comming soon! {vibe}
+          <:details :let={vibe}>
+            Win amazing prizes and support your favorite creators {vibe}
+          </:details>
+          <:details>
+            Any guesses?
+          </:details>
+        </.banner>
 
-      <.filter_form form={@form} charity_options={@charity_options} />
+        <.filter_form form={@form} charity_options={@charity_options} />
 
-      <section>
-        <div class="raffles" id="raffles" phx-update="stream">
-          <.raffle_card :for={{dom_id, raffle} <- @streams.raffles} raffle={raffle} id={dom_id} />
-        </div>
-      </section>
-    </div>
+        <section>
+          <div class="raffles" id="raffles" phx-update="stream">
+            <.raffle_card :for={{dom_id, raffle} <- @streams.raffles} raffle={raffle} id={dom_id} />
+          </div>
+        </section>
+      </div>
     </Layouts.app>
     """
   end
@@ -80,6 +80,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
   end
 
   attr :form, :map, required: true
+  attr :charity_options, :map, required: true
 
   def filter_form(assigns) do
     ~H"""

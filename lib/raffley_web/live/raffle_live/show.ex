@@ -19,6 +19,8 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
+    if connected?(socket), do: Raffles.subscribe(id)
+
     socket =
       case Raffles.get_raffle!(id) do
         nil ->
@@ -26,10 +28,12 @@ defmodule RaffleyWeb.RaffleLive.Show do
           |> push_navigate(to: "/raffles")
 
         raffle ->
-          user = socket.assigns.current_scope.user
+          tickets = Raffles.list_tickets(raffle)
 
           assign(socket, raffle: Repo.preload(raffle, :charity), page_title: raffle.prize)
-          |> assign(:tickets, Tickets.list_tickets(user, raffle))
+          |> stream(:tickets, tickets)
+          |> assign(:ticket_count, Enum.count(tickets))
+          |> assign(:ticket_sum, Enum.sum_by(tickets, & &1.price))
           |> assign_async(:featured_raffles, fn ->
             # TODO: Remove when nessary, this is for testing purposes
             Process.sleep(2000)
@@ -39,6 +43,27 @@ defmodule RaffleyWeb.RaffleLive.Show do
       end
 
     {:noreply, socket}
+  end
+
+  attr :id, :string, required: true
+  attr :ticket, Ticket, required: true
+
+  def ticket(assigns) do
+    ~H"""
+    <div class="ticket" id={@id}>
+      <section>
+        <div class="price-paid">
+          ${@ticket.price}
+        </div>
+        <span class="username">
+          {@ticket.user.name}
+        </span>
+        <blockquote>
+          {@ticket.comment}
+        </blockquote>
+      </section>
+    </div>
+    """
   end
 
   #
@@ -62,36 +87,27 @@ defmodule RaffleyWeb.RaffleLive.Show do
             <div class="description">
               {@raffle.description}
             </div>
+
+            <div class="totals">
+              {@ticket_count} Tickets Sold - ${@ticket_sum} Raised
+            </div>
           </section>
         </div>
         <div class="activity">
           <div class="left">
-            <div :if={@raffle.status == :open}>
-              <%= if @current_scope do %>
-                <.form for={@form} id="ticket-form" phx-submit="save">
-                  <.input field={@form[:comment]} placeholder="comment" autofocus />
-                  <.button>Get A Ticket</.button>
-                </.form>
-              <% end %>
+            <div :if={@raffle.status == :open && @current_scope}>
+              <.form for={@form} id="ticket-form" phx-submit="save">
+                <.input field={@form[:comment]} placeholder="Comment..." autofocus />
+                <.button>Get A Ticket</.button>
+              </.form>
             </div>
 
-            <div :if={@tickets} class="mt-4">
-              <h4 class="font-semibold text-lg mb-2">Your Tickets</h4>
-              <ul class="space-y-2">
-                <li :for={ticket <- @tickets} class="border-b grid grid-cols-2 items-center">
-                  <div>
-                    {ticket.comment}
-                  </div>
-                  <div class="text-sm text-gray-500">
-                    {Calendar.strftime(ticket.inserted_at, "%b %d %Y %H:%M:%S")}
-                  </div>
-                </li>
-              </ul>
+            <div id="tickets" phx-update="stream">
+              <.ticket :for={{dom_id, ticket} <- @streams.tickets} id={dom_id} ticket={ticket} />
             </div>
           </div>
           <div class="right">
             <h4>Featured Raffles</h4>
-
             <.featured_raffles raffles={@featured_raffles} />
           </div>
         </div>
@@ -144,17 +160,34 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
     case Tickets.create_ticket(scope.user, raffle, ticket_params) do
       {:ok, ticket} ->
-        changeset = Tickets.change_ticket(%Ticket{})
+        changeset = Tickets.change_ticket(%Ticket{comment: ""})
 
         socket =
           assign(socket, form: to_form(changeset))
           |> put_flash(:info, "Your ticket #{ticket.id} has been created")
+          |> stream_insert(:tickets, ticket, at: 0)
+          |> update(:ticket_count, &(&1 + 1))
+          |> update(:ticket_sum, &(&1 + ticket.price))
 
         {:noreply, socket}
 
       {:error, changeset} ->
-        IO.inspect(changeset, label: "changeset error:")
+        # IO.inspect(changeset, label: "changeset error:")
         {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
     end
+  end
+
+  def handle_info({:ticket_created, ticket}, socket) do
+    IO.inspect(ticket.comment, label: "handle_info")
+    # IO.inspect(ticket, label: "ticket that was created:::::::")
+
+    socket =
+      socket
+      |> put_flash(:info, "A new ticket has been created")
+      |> stream_insert(:tickets, ticket, at: 0)
+      |> update(:ticket_count, &(&1 + 1))
+      |> update(:ticket_sum, &(&1 + ticket.price))
+
+    {:noreply, socket}
   end
 end

@@ -10,28 +10,13 @@ defmodule Raffley.Tickets do
   alias Raffley.Accounts.User
   alias Raffley.Raffles.Raffle
 
-  @doc """
-  Subscribes to scoped notifications about any ticket changes.
+  # def subscribe_tickets(%Raffle{} = raffle) do
+  #   Phoenix.PubSub.subscribe(Raffley.PubSub, "raffles:#{raffle.id}")
+  # end
 
-  The broadcasted messages match the pattern:
-
-    * {:created, %Ticket{}}
-    * {:updated, %Ticket{}}
-    * {:deleted, %Ticket{}}
-
-  """
-
-  def subscribe_tickets(%User{} = user) do
-    key = user.id
-
-    Phoenix.PubSub.subscribe(Raffley.PubSub, "user:#{key}:tickets")
-  end
-
-  defp broadcast(%User{} = user, message) do
-    key = user.id
-
-    Phoenix.PubSub.broadcast(Raffley.PubSub, "user:#{key}:tickets", message)
-  end
+  # defp broadcast(%Raffle{} = raffle, message) do
+  #   Phoenix.PubSub.broadcast(Raffley.PubSub, "raffles:#{raffle.id}", message)
+  # end
 
   @doc """
   Returns the list of tickets.
@@ -47,6 +32,8 @@ defmodule Raffley.Tickets do
       from ticket in Ticket, where: ticket.user_id == ^user.id and ticket.raffle_id == ^raffle.id
     )
   end
+
+  def list_tickets(_a, _b), do: []
 
   @doc """
   Gets a single ticket.
@@ -79,16 +66,17 @@ defmodule Raffley.Tickets do
 
   """
   def create_ticket(%User{} = user, %Raffle{} = raffle, attrs \\ %{}) do
-    # with {:ok, ticket = %Ticket{}} <-
-    #        %Ticket{raffle: raffle, user: user, price: raffle.ticket_price}
-    #        |> Ticket.changeset(attrs)
-    #        |> Repo.insert() do
-    #   # broadcast(user, {:created, ticket})
-    #   {:ok, ticket}
-    # end
-    %Ticket{raffle: raffle, user: user, price: raffle.ticket_price}
-    |> Ticket.changeset(attrs)
-    |> Repo.insert()
+    with {:ok, ticket = %Ticket{}} <-
+           %Ticket{raffle: raffle, user: user, price: raffle.ticket_price}
+           |> Ticket.changeset(attrs)
+           |> Repo.insert() do
+      Raffley.Raffles.broadcast(raffle.id, {:ticket_created, ticket})
+      {:ok, ticket}
+    end
+
+    # %Ticket{raffle: raffle, user: user, price: raffle.ticket_price}
+    # |> Ticket.changeset(attrs)
+    # |> Repo.insert()
   end
 
   @doc """
@@ -132,7 +120,7 @@ defmodule Raffley.Tickets do
 
     with {:ok, ticket = %Ticket{}} <-
            Repo.delete(ticket) do
-      broadcast(user, {:deleted, ticket})
+      Raffley.Raffles.broadcast(ticket.raffle_id, {:ticket_deleted, ticket})
       {:ok, ticket}
     end
   end

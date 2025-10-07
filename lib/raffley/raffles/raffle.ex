@@ -12,6 +12,7 @@ defmodule Raffley.Raffles.Raffle do
     field :image_path, :string, default: "/images/placeholder.jpg"
 
     belongs_to :charity, Raffley.Charities.Charity
+    belongs_to :winning_ticket, Raffley.Tickets.Ticket
     has_many :tickets, Raffley.Tickets.Ticket
 
     timestamps(type: :utc_datetime)
@@ -20,7 +21,15 @@ defmodule Raffley.Raffles.Raffle do
   @doc false
   def changeset(raffle, attrs \\ %{}) do
     raffle
-    |> cast(attrs, [:prize, :description, :ticket_price, :status, :image_path, :charity_id])
+    |> cast(attrs, [
+      :prize,
+      :description,
+      :ticket_price,
+      :status,
+      :image_path,
+      :charity_id,
+      :winning_ticket_id
+    ])
     |> validate_required([:prize, :description, :ticket_price, :status, :image_path, :charity_id])
     |> validate_length(:prize, min: 4)
     |> validate_length(:description, min: 10)

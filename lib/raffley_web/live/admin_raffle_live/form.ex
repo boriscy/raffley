@@ -83,47 +83,51 @@ defmodule RaffleyWeb.AdminRaffleLive.Form do
 
   def render(assigns) do
     ~H"""
-    <.header>
-      {@page_title}
-    </.header>
-    <.simple_form for={@form} id="raffle-form" phx-submit="save" phx-change="validate">
-      <.input field={@form[:prize]} label="Prize" phx-debounce="blur" />
-      <.input
-        field={@form[:description]}
-        type="textarea"
-        label={gettext("Description")}
-        phx-debounce="blur"
-      />
-      <.input field={@form[:ticket_price]} type="number" label={gettext("Ticket Price")} />
-      <.input
-        type="select"
-        field={@form[:status]}
-        label={gettext("Status")}
-        prompt={gettext("Chooose status")}
-        options={Raffle.statuses()}
-      />
-      <.input
-        type="select"
-        field={@form[:charity_id]}
-        label={gettext("Charity")}
-        prompt={gettext("Choose charity")}
-        options={@charity_options}
-      />
+    <Layouts.app flash={@flash}>
+      <.header>
+        {@page_title}
+      </.header>
+      <div class="mx-auto max-w-2xl">
+        <.simple_form for={@form} id="raffle-form" phx-submit="save" phx-change="validate">
+          <.input field={@form[:prize]} label="Prize" phx-debounce="blur" />
+          <.input
+            field={@form[:description]}
+            type="textarea"
+            label={gettext("Description")}
+            phx-debounce="blur"
+          />
+          <.input field={@form[:ticket_price]} type="number" label={gettext("Ticket Price")} />
+          <.input
+            type="select"
+            field={@form[:status]}
+            label={gettext("Status")}
+            prompt={gettext("Chooose status")}
+            options={Raffle.statuses()}
+          />
+          <.input
+            type="select"
+            field={@form[:charity_id]}
+            label={gettext("Charity")}
+            prompt={gettext("Choose charity")}
+            options={@charity_options}
+          />
 
-      <.input field={@form[:image_path]} label={gettext("Image path")} />
+          <.input field={@form[:image_path]} label={gettext("Image path")} />
 
-      <:actions>
-        <.button phx-disable-with="Saving...">
-          <%= if assigns.live_action == :new do %>
-            {gettext("Create Raffle")}
-          <% else %>
-            {gettext("Update Raffle")}
-          <% end %>
-        </.button>
-      </:actions>
-    </.simple_form>
+          <:actions>
+            <.button phx-disable-with="Saving...">
+              <%= if assigns.live_action == :new do %>
+                {gettext("Create Raffle")}
+              <% else %>
+                {gettext("Update Raffle")}
+              <% end %>
+            </.button>
+          </:actions>
+        </.simple_form>
 
-    <.back navigate={~p"/admin/raffles"}>Back</.back>
+        <.back navigate={~p"/admin/raffles"}>Back</.back>
+      </div>
+    </Layouts.app>
     """
   end
 end

@@ -16,7 +16,7 @@ defmodule Raffley.Tickets.Ticket do
     ticket
     |> cast(attrs, [:price, :comment])
     |> validate_required([:price])
-    |> validate_length(:comment, max: 100)
+    |> validate_length(:comment, max: 100, min: 3)
     |> assoc_constraint(:raffle)
     |> assoc_constraint(:user)
   end
