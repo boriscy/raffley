@@ -45,14 +45,20 @@ defmodule RaffleyWeb.Router do
       live "/raffles", RaffleLive.Index
       live "/raffles/:id", RaffleLive.Show
 
-      live "/admin/raffles", AdminRaffleLive.Index
-      live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
-      live "/admin/raffles/new", AdminRaffleLive.Form, :new
-
       live "/charities", CharityLive.Index, :index
       live "/charities/new", CharityLive.Form, :new
       live "/charities/:id", CharityLive.Show, :show
       live "/charities/:id/edit", CharityLive.Form, :edit
+    end
+  end
+
+  scope "/admin", RaffleyWeb do
+    pipe_through [:browser, :require_authenticated_admin]
+
+    live_session :current_user_admin, on_mount: [{RaffleyWeb.UserAuth, :require_authenticated_admin}] do
+      live "/raffles", AdminRaffleLive.Index
+      live "/raffles/:id/edit", AdminRaffleLive.Form, :edit
+      live "/raffles/new", AdminRaffleLive.Form, :new
     end
   end
 

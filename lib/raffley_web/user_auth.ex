@@ -5,6 +5,7 @@ defmodule RaffleyWeb.UserAuth do
   import Phoenix.Controller
 
   alias Raffley.Accounts
+  alias Raffley.Accounts.User
   alias Raffley.Accounts.Scope
 
   # Make the remember me cookie valid for 14 days. This should match
@@ -179,6 +180,24 @@ defmodule RaffleyWeb.UserAuth do
 
   defp user_session_topic(token), do: "users_sessions:#{Base.url_encode64(token)}"
 
+
+  def on_mount(:require_authenticated_admin, _params, session, socket) do
+    socket = mount_current_scope(socket, session)
+
+    with %{user: %User{role: "admin"}} <- socket.assigns.current_scope do
+      {:cont, socket}
+    else
+      _ ->
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You must be admin to access this page.")
+        |> Phoenix.LiveView.redirect(to: ~p"/")
+       
+        {:halt, socket}
+    end
+  end
+
+
   @doc """
   Handles mounting and authenticating the current_scope in LiveViews.
 
@@ -212,7 +231,6 @@ defmodule RaffleyWeb.UserAuth do
       end
   """
   def on_mount(:mount_current_scope, _params, session, socket) do
-    IO.puts("mount_current_scope")
     {:cont, mount_current_scope(socket, session)}
   end
 
@@ -280,9 +298,29 @@ defmodule RaffleyWeb.UserAuth do
     end
   end
 
+  def require_authenticated_admin(conn, _opts) do
+    with %{user: %User{role: "admin"}} <- conn.assigns.current_scope do
+      conn
+    else
+      _ ->
+        conn
+        |> put_flash(:error, "You must log in to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/users/log-in")
+        |> halt()
+    end
+  end
+
   defp maybe_store_return_to(%{method: "GET"} = conn) do
     put_session(conn, :user_return_to, current_path(conn))
   end
 
   defp maybe_store_return_to(conn), do: conn
+
+  defp maybe_store_return_to(%{method: "GET"} = conn) do
+    put_session(conn, :user_return_to, current_path(conn))
+  end
+
+  defp maybe_store_return_to(conn), do: conn
+
 end

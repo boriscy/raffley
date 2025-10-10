@@ -147,6 +147,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_event("validate", %{"ticket" => ticket_params}, socket) do
+    IO.inspect(socket.assigns, "Assigns")
     %{raffle: raffle, current_scope: scope} = socket.assigns
     ticket = %Ticket{user_id: scope.user.id, raffle_id: raffle.id}
 
@@ -156,6 +157,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_event("save", %{"ticket" => ticket_params}, socket) do
+    IO.inspect(socket.assigns.current_scope, label: "Handle save")
     %{raffle: raffle, current_scope: scope} = socket.assigns
 
     case Tickets.create_ticket(scope.user, raffle, ticket_params) do

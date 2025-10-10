@@ -9,11 +9,14 @@ defmodule Raffley.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :role, :string
 
     has_many :tickets, Raffley.Tickets.Ticket
 
     timestamps(type: :utc_datetime)
   end
+
+  @roles ["admin", "user"]
 
   @doc """
   A user changeset for registering or changing the email.
@@ -37,6 +40,12 @@ defmodule Raffley.Accounts.User do
     |> cast(attrs, [:name])
     |> validate_required([:name])
     |> validate_length(:name, min: 3, max: 100)
+  end
+
+  def role_changeset(user, attrs) do
+    user
+      |> cast(attrs, [:role])
+      |> validate_inclusion(:role, @roles)
   end
 
   defp validate_email(changeset, opts) do
