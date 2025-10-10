@@ -27,7 +27,7 @@ defmodule RaffleyWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header>
+    <header class="px-8">
       <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
         <div class="flex items-center gap-4">
           <a href="/">
@@ -39,7 +39,7 @@ defmodule RaffleyWeb.Layouts do
       </div>
     </header>
 
-    <main>
+    <main class="max-w-4xl mx-auto">
       {render_slot(@inner_block)}
     </main>
 

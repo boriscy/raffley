@@ -12,7 +12,8 @@ defmodule Raffley.Raffles do
   end
 
   def get_raffle!(id) do
-    Repo.get!(Raffle, id)
+    Repo.get!(Raffle, id) 
+      |> Repo.preload([:charity, winning_ticket: :user])
   end
 
   def list_raffles do

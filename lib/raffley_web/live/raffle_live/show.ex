@@ -21,6 +21,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   def handle_params(%{"id" => id}, _uri, socket) do
     if connected?(socket), do: Raffles.subscribe(id)
 
+    # Raffles.get! preloads [:charity, winning_ticket: :user]
     socket =
       case Raffles.get_raffle!(id) do
         nil ->
@@ -71,6 +72,19 @@ defmodule RaffleyWeb.RaffleLive.Show do
     ~H"""
     <Layouts.app flash={@flash}>
       <div class="raffle-show">
+        <.banner :if={@raffle.winning_ticket}>
+          <.icon name="hero-sparkles-solid" />
+          Congratulations  {@raffle.winning_ticket.user.name}
+          <:details>
+            <div>
+              Your ticket {@raffle.winning_ticket_id} is the winner
+            </div>
+            <div class="text-sm text-gray-300">
+              {@raffle.winning_ticket.comment}
+            </div>
+          </:details>
+        </.banner>
+
         <div class="raffle">
           <img src={@raffle.image_path} alt="Image" />
           <section>
@@ -147,7 +161,6 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_event("validate", %{"ticket" => ticket_params}, socket) do
-    IO.inspect(socket.assigns, "Assigns")
     %{raffle: raffle, current_scope: scope} = socket.assigns
     ticket = %Ticket{user_id: scope.user.id, raffle_id: raffle.id}
 
@@ -180,9 +193,6 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_info({:ticket_created, ticket}, socket) do
-    IO.inspect(ticket.comment, label: "handle_info")
-    # IO.inspect(ticket, label: "ticket that was created:::::::")
-
     socket =
       socket
       |> put_flash(:info, "A new ticket has been created")

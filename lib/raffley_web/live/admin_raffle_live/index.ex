@@ -106,7 +106,8 @@ defmodule RaffleyWeb.AdminRaffleLive.Index do
           </:action>
 
           <:action :let={{_dom_id, raffle}}>
-            <.link phx-click="draw-winner" phx-value-id={raffle.id}>
+            <.link phx-click="draw-winner" phx-value-id={raffle.id}  :if={:closed == raffle.status} 
+              class="block text-center btn bg-blue-500 rounded-md !text-white mt-2">
               Draw Winner
             </.link>
           </:action>
