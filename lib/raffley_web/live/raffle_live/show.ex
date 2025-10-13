@@ -73,8 +73,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
     <Layouts.app flash={@flash}>
       <div class="raffle-show">
         <.banner :if={@raffle.winning_ticket}>
-          <.icon name="hero-sparkles-solid" />
-          Congratulations  {@raffle.winning_ticket.user.name}
+          <.icon name="hero-sparkles-solid" /> Congratulations {@raffle.winning_ticket.user.name}
           <:details>
             <div>
               Your ticket {@raffle.winning_ticket_id} is the winner
@@ -150,7 +149,6 @@ defmodule RaffleyWeb.RaffleLive.Show do
       <ul class="raffles">
         <li :for={raffle <- raffles}>
           <.link navigate={~p"/raffles/#{raffle.id}"}>
-            <%!-- <Index.raffle_card raffle={raffle} /> --%>
             <img src={raffle.image_path} alt="Image" />
             {raffle.prize}
           </.link>
@@ -187,7 +185,6 @@ defmodule RaffleyWeb.RaffleLive.Show do
         {:noreply, socket}
 
       {:error, changeset} ->
-        # IO.inspect(changeset, label: "changeset error:")
         {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
     end
   end
@@ -199,6 +196,15 @@ defmodule RaffleyWeb.RaffleLive.Show do
       |> stream_insert(:tickets, ticket, at: 0)
       |> update(:ticket_count, &(&1 + 1))
       |> update(:ticket_sum, &(&1 + ticket.price))
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:raffle_updated, raffle}, socket) do
+    socket =
+      socket
+      |> put_flash(:info, "A winner has been drawn")
+      |> assign(:raffle, Repo.preload(raffle, winning_ticket: :user))
 
     {:noreply, socket}
   end
