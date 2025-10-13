@@ -5,6 +5,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   alias Raffley.Repo
   alias Raffley.Tickets
   alias Raffley.Tickets.Ticket
+  alias RaffleyWeb.Presence
 
   # Can mount the user in any live_view
   # on_mount {RaffleyWeb.UserAuth, :mount_current_scope}
@@ -19,7 +20,32 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
-    if connected?(socket), do: Raffles.subscribe(id)
+    user =
+      with %{user: user} <- socket.assigns.current_scope do
+        user
+      else
+        _ -> nil
+      end
+
+    if connected?(socket) do
+      Raffles.subscribe(id)
+
+      payload = %{
+        email: user.email,
+        name: user.name,
+        online_at: System.system_time(:second)
+      }
+
+      if user do
+        {:ok, _} = Presence.track(self(), topic(id), user.id, payload)
+      end
+    end
+
+    presences =
+      Presence.list(topic(id))
+      |> Enum.map(fn {id, %{metas: metas}} ->
+        %{id: id, metas: metas}
+      end)
 
     # Raffles.get! preloads [:charity, winning_ticket: :user]
     socket =
@@ -34,10 +60,11 @@ defmodule RaffleyWeb.RaffleLive.Show do
           assign(socket, raffle: Repo.preload(raffle, :charity), page_title: raffle.prize)
           |> stream(:tickets, tickets)
           |> assign(:ticket_count, Enum.count(tickets))
+          |> stream(:presences, presences)
           |> assign(:ticket_sum, Enum.sum_by(tickets, & &1.price))
           |> assign_async(:featured_raffles, fn ->
             # TODO: Remove when nessary, this is for testing purposes
-            Process.sleep(2000)
+            Process.sleep(500)
             {:ok, %{featured_raffles: Raffles.featured(raffle)}}
             # {:error, "Failed to load featured raffles"}
           end)
@@ -45,6 +72,8 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
     {:noreply, socket}
   end
+
+  def topic(id), do: "raffle_watchers:#{id}"
 
   attr :id, :string, required: true
   attr :ticket, Ticket, required: true
@@ -120,8 +149,9 @@ defmodule RaffleyWeb.RaffleLive.Show do
             </div>
           </div>
           <div class="right">
-            <h4>Featured Raffles</h4>
             <.featured_raffles raffles={@featured_raffles} />
+
+            <.raffle_watchers :if={@current_scope} presences={@streams.presences} />
           </div>
         </div>
       </div>
@@ -133,6 +163,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
   def featured_raffles(assigns) do
     ~H"""
+    <h4>Featured Raffles</h4>
     <.async_result :let={raffles} assign={@raffles}>
       <:loading>
         <div class="loading">
@@ -155,6 +186,21 @@ defmodule RaffleyWeb.RaffleLive.Show do
         </li>
       </ul>
     </.async_result>
+    """
+  end
+
+  def raffle_watchers(assigns) do
+    ~H"""
+    <section>
+      <ul class="presences" id="raffle-watchers" phx-update="stream">
+        <li :for={{dom_id, %{id: id, metas: [user | _b]}} <- @presences} id={dom_id}>
+          <.icon name="hero-user-circle-solid" size="size-5" />
+          <button onclick={"alert('#{user.name} ID is: #{id}')"}>
+            {user.name}
+          </button>
+        </li>
+      </ul>
+    </section>
     """
   end
 
