@@ -30,22 +30,13 @@ defmodule RaffleyWeb.RaffleLive.Show do
     if connected?(socket) do
       Raffles.subscribe(id)
 
-      payload = %{
-        email: user.email,
-        name: user.name,
-        online_at: System.system_time(:second)
-      }
-
       if user do
-        {:ok, _} = Presence.track(self(), topic(id), user.id, payload)
+        Presence.track_user(id, user)
+        Presence.subscribe(id)
       end
     end
 
-    presences =
-      Presence.list(topic(id))
-      |> Enum.map(fn {id, %{metas: metas}} ->
-        %{id: id, metas: metas}
-      end)
+    presences = Presence.list_users(id)
 
     # Raffles.get! preloads [:charity, winning_ticket: :user]
     socket =
@@ -72,8 +63,6 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
     {:noreply, socket}
   end
-
-  def topic(id), do: "raffle_watchers:#{id}"
 
   attr :id, :string, required: true
   attr :ticket, Ticket, required: true
@@ -194,7 +183,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
     <section>
       <ul class="presences" id="raffle-watchers" phx-update="stream">
         <li :for={{dom_id, %{id: id, metas: [user | _b]}} <- @presences} id={dom_id}>
-          <.icon name="hero-user-circle-solid" size="size-5" />
+          <.icon name="hero-user-circle-solid" class="size-5" />
           <button onclick={"alert('#{user.name} ID is: #{id}')"}>
             {user.name}
           </button>
@@ -253,5 +242,19 @@ defmodule RaffleyWeb.RaffleLive.Show do
       |> assign(:raffle, Repo.preload(raffle, winning_ticket: :user))
 
     {:noreply, socket}
+  end
+
+  def handle_info({:user_joined, presence}, socket) do
+    socket = socket |> stream_insert(:presences, presence)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:user_left, presence}, socket) do
+    if presence.metas == [] do
+      {:noreply, stream_delete(socket, :presences, presence)}
+    else
+      {:noreply, stream_insert(socket, :presences, presence)}
+    end
   end
 end
